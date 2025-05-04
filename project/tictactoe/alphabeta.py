@@ -34,14 +34,52 @@ class TTT_AlphaBetaPlayer(Player):
         :param player_letter: value representing the player
         :param alpha: best value that the maximizer can guarantee
         :param beta: best value that the minimizer can guarantee
-        :return: (row, col) of the selected move
+        :return: [row, col, best_score] of the selected move
         """
-        best = None
-        ######### YOUR CODE HERE #########
+        if game.game_over() or depth == 0:
+            return [None, None, self.evaluate(game)]
         
+        best = [None, None, None]        
 
-        
-        ######### YOUR CODE HERE #########
+        if player_letter == "X":
+            best_score = -math.inf
+            best = [None, None, best_score]
+            
+            for cell in game.empty_cells(state=game.board_state):
+                next_x, next_y = cell
+                temp_game = game.copy()
+                temp_game.set_move(next_x, next_y, player_letter)
+                _, _, score = self.minimax(temp_game, depth - 1, "O", alpha, beta)
+                
+                if score > best_score:
+                    best_score = score
+                    best = [next_x, next_y, best_score]
+                
+                # Alpha-Beta Pruning
+                alpha = max(alpha, best_score)
+                if beta <= alpha:
+                    break
+            return best
+
+        if player_letter == "O":
+            best_score = math.inf
+            best = [None, None, best_score]
+            
+            for cell in game.empty_cells(state=game.board_state):
+                next_x, next_y = cell
+                temp_game = game.copy()
+                temp_game.set_move(next_x, next_y, player_letter)
+                _, _, score = self.minimax(temp_game, depth - 1, "X", alpha, beta)
+                
+                if score < best_score:
+                    best_score = score
+                    best = [next_x, next_y, best_score]
+                
+                # Alpha-Beta Pruning
+                beta = min(beta, best_score)
+                if beta <= alpha:
+                    break
+
         return best
     
     def evaluate(self, game: TicTacToe) -> int:
@@ -50,13 +88,13 @@ class TTT_AlphaBetaPlayer(Player):
         :param game: the game state to evaluate
         :return: the score of the board from the perspective of current player
         """
-        score = 0
-        ######### YOUR CODE HERE #########
+        if game.wins("X"):
+            return 1
         
-
+        if game.wins("O"):
+            return -1
         
-        ######### YOUR CODE HERE #########
-        return score
+        return 0
     
     def __str__(self) -> str:
         return "Alpha-Beta Player"
