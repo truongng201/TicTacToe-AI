@@ -6,6 +6,7 @@ TODO: Implement the TreeNode for TTT_MCTSPlayer class.
 
 import numpy as np
 import math
+import random
 
 from ..player import Player
 from ..game import TicTacToe
@@ -13,7 +14,7 @@ from ..game import TicTacToe
 WIN = 1
 LOSE = -1
 DRAW = 0
-NUM_SIMULATIONS = 5000
+NUM_SIMULATIONS = 10000
 
 class TreeNode():
     def __init__(self, game_state: TicTacToe, player_letter: str, parent=None, parent_action=None):
@@ -29,47 +30,64 @@ class TreeNode():
         """
         Select the best child node based on UCB1 formula. Keep selecting until a leaf node is reached.
         """
-        leaf_node = None
-        ######### YOUR CODE HERE #########
-        
-
-        
-        ######### YOUR CODE HERE #########
-        return leaf_node
+        current_node = self
+        while not current_node.is_leaf_node():
+            current_node = current_node.best_child()
+        return current_node
     
     def expand(self) -> 'TreeNode':
         """
         Expand the current node by adding all possible child nodes. Return one of the child nodes for simulation.
         """
-        child_node = None
-        ######### YOUR CODE HERE #########
+        if self.is_terminal_node():
+            return self
+            
+        for cell in self.game_state.empty_cells():
+            x, y = cell
+            temp_game = self.game_state.copy()
+            temp_game.set_move(x, y, self.game_state.curr_player)
+            next_player = 'O' if self.player == 'X' else 'X'
+            child_node = TreeNode(
+                game_state=temp_game,
+                player_letter=next_player,
+                parent=self,
+                parent_action=(x, y)
+            )
+            self.children.append(child_node)
         
-
-        
-        ######### YOUR CODE HERE #########
-        return child_node
+        return random.choice(self.children)
     
     def simulate(self) -> int:
         """
         Run simulation from the current node until the game is over. Return the result of the simulation.
         """
-        result = 0
-        ######### YOUR CODE HERE #########
+        sim_game = self.game_state.copy()
         
-
+        while not sim_game.game_over():
+            empty_cells = sim_game.empty_cells()
+            if not empty_cells:
+                break
+            x, y = random.choice(empty_cells)
+            sim_game.set_move(x, y, sim_game.curr_player)
         
-        ######### YOUR CODE HERE #########
-        return result
+        if sim_game.wins(self.player):
+            return WIN
+        
+        if sim_game.wins('O' if self.player == 'X' else 'X'):
+            return LOSE
+        
+        return DRAW
     
     def backpropagate(self, result: int):
         """
         Backpropagate the result of the simulation to the root node.
         """
-        ######### YOUR CODE HERE #########
+        self.N += 1
+        self.Q += result
         
+        if self.parent is not None:
+            self.parent.backpropagate(-result)
 
-        
-        ######### YOUR CODE HERE #########
             
     def is_leaf_node(self) -> bool:
         return len(self.children) == 0
