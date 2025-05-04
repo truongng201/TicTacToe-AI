@@ -1,13 +1,9 @@
-"""
-TODO: Implement the TTT_QPlayer class.
-* Note 1: You should read the game logic in project/game.py to familiarize yourself with the environment.
-* Note 2: You don't have to strictly follow the template or even use it at all. Feel free to create your own implementation.
-"""               
 from typing import List, Tuple, Union             
 from ..player import Player
 from ..game import TicTacToe
 from . import *
 from tqdm import tqdm
+import numpy as np
 
 NUM_EPISODES = 100000
 LEARNING_RATE = 0.5
@@ -73,45 +69,53 @@ class TTT_QPlayer(Player):
     
     def update_rewards(self, reward: float):
         """
-        :param reward: reward value at the end of the game
-        Given the reward at the end of the game, update the Q-values for each state-action pair in the game with the Bellman equation:
-            Q(s, a) = Q(s, a) + alpha * (reward + gamma * max(Q(s', a')) - Q(s, a)) 
-                    with each (s, a) stored self.action_history.
-        We need to update the Q-values for each state-action pair in the action history because the reward is only received at the end.
-          
+        Update Q-values for all state-action pairs in the action history using the final reward.
         """
-        ######### YOUR CODE HERE #########
-        
-
-        
-        ######### YOUR CODE HERE #########
+        for state, action in reversed(self.action_history):
+            next_state = state  # For terminal state, s' = s
+            self.update_q_values(state, tuple(action), next_state, reward)
+            reward = reward * self.gamma  # Decay reward as we go backward in time
+            
 
     def choose_action(self, game: TicTacToe) -> Union[List[int], Tuple[int, int]]:
         """
         Choose action with ε-greedy strategy.
-        if random number < ε, choose random action
-        else choose action with the highest Q-value
         """
-        action = None
-        ######### YOUR CODE HERE #########
-        
+        possible_actions = game.empty_cells()
+        state = self.hash_board(game.board_state)
 
-        
-        ######### YOUR CODE HERE #########                                
-        return action
+        # Exploration
+        if np.random.rand() < self.epsilon:
+            return possible_actions[np.random.randint(len(possible_actions))]
+
+        # Exploitation
+        q_values = []
+        for action in possible_actions:
+            action_tuple = tuple(action)
+            q_values.append(self.Q.get((state, action_tuple), 0))
+
+        max_q = max(q_values)
+        best_actions = [a for a, q in zip(possible_actions, q_values) if q == max_q]
+        return best_actions[np.random.randint(len(best_actions))]
     
     def update_q_values(self, state, action, next_state, reward):
         """
-        Given (s, a, s', r), update the Q-value for the state-action pair (s, a) using the Bellman equation:
-            Q(s, a) = Q(s, a) + alpha * (reward + gamma * max(Q(s', a')) - Q(s, a))
+        Update Q-value for a single state-action pair.
         """
-        ######### YOUR CODE HERE #########
-        
+        curr_q = self.Q.get((state, action), 0)
+        # Estimate max future Q value from next state
+        next_qs = [self.Q.get((next_state, tuple(a)), 0) for a in [(i, j) for i in range(3) for j in range(3)]]
+        max_next_q = max(next_qs) if next_qs else 0
 
+        # Q-learning update rule
+        new_q = curr_q + self.learning_rate * (reward + self.gamma * max_next_q - curr_q)
+        self.Q[(state, action)] = new_q   
+            
         
-        ######### YOUR CODE HERE #########  
-    
     def hash_board(self, board):
+        """
+        Convert board state to a string key for Q-table.
+        """
         key = ''
         for i in range(3):
             for j in range(3):
@@ -124,10 +128,12 @@ class TTT_QPlayer(Player):
         return key
 
     def get_move(self, game: TicTacToe):
-        self.epsilon = 0 # No exploration 
+        """
+        Get move during actual play (with no exploration).
+        """
+        self.epsilon = 0  # No exploration during actual play
         move = self.choose_action(game)
         return move
     
     def __str__(self):
         return "Q-Learning Player"
-    

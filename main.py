@@ -9,8 +9,8 @@ if __name__ == '__main__':
     # Initialize Argument Parser for command line arguments
     parser = argparse.ArgumentParser(description='Play Tic Tac Toe')
     parser.add_argument('--game', '-g', type=str, default='tictactoe', help='Choose the game to play')
-    parser.add_argument('--player1', '-p1', type=str, default='human', choices=['minimax', 'alphabeta', 'mcts', 'qlearning', 'human', 'random'], help='Choose player 1')
-    parser.add_argument('--player2', '-p2', type=str, default='random', choices=['minimax', 'alphabeta', 'mcts', 'qlearning', 'human', 'random'], help='Choose player 2')
+    parser.add_argument('--player1', '-p1', type=str, default='human', choices=['minimax', 'alphabeta', 'mcts', 'qplayer', 'human', 'random'], help='Choose player 1')
+    parser.add_argument('--player2', '-p2', type=str, default='random', choices=['minimax', 'alphabeta', 'mcts', 'qplayer', 'human', 'random'], help='Choose player 2')
     parser.add_argument('--mode', '-m', type=str, default='plain', choices=['silent', 'plain', 'ui'], help='Choose visualization mode')
     parser.add_argument('--num_games', '-n', type=int, default=1, help='Number of games to run')
     parser.add_argument('--timeout', '-t', type=int, default=10, help='Timeout for each move')
