@@ -134,10 +134,12 @@ class GamePlay():
         draw = self.num_games - sum(self.score.values())
         print(f"Draws {draw}/{self.num_games} games\n")
         
+        # for player, times in move_times.items():
+        #     avg_time_per_move = sum(times) / len(times) if times else 0
+        #     print(f"{player} average move duration: {avg_time_per_move:.2f} seconds")
         for player, times in move_times.items():
-            avg_time_per_move = sum(times) / len(times) if times else 0
-            print(f"{player} average move duration: {avg_time_per_move:.2f} seconds")
-
+            avg_time_per_move = sum(times) / len(times) * 1000 if times else 0
+            print(f"{player} average move duration: {avg_time_per_move:.2f} milliseconds")
         print(f"Total evaluation time: {total_evaluation_time:.2f} seconds\n")
     
     def run_ui_mode(self):
