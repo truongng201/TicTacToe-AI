@@ -14,7 +14,8 @@ from ..game import TicTacToe
 WIN = 1
 LOSE = -1
 DRAW = 0
-NUM_SIMULATIONS = 10000
+NUM_SIMULATIONS = 5000
+EXPLORATION_CONSTANT = math.sqrt(2)
 
 class TreeNode():
     def __init__(self, game_state: TicTacToe, player_letter: str, parent=None, parent_action=None):
@@ -98,7 +99,7 @@ class TreeNode():
     def best_child(self) -> 'TreeNode':
         return max(self.children, key=lambda c: c.ucb())
     
-    def ucb(self, c=math.sqrt(2)) -> float:
+    def ucb(self, c=EXPLORATION_CONSTANT) -> float:
         if self.N == 0:
             return float('inf')
         return self.Q / self.N + c * np.sqrt(np.log(self.parent.N) / self.N)
@@ -107,6 +108,7 @@ class TTT_MCTSPlayer(Player):
     def __init__(self, letter, num_simulations=NUM_SIMULATIONS):
         super().__init__(letter)
         self.num_simulations = num_simulations
+        self.exploration_constant = EXPLORATION_CONSTANT
     
     def get_move(self, game):
         mcts = TreeNode(game, self.letter)

@@ -32,36 +32,35 @@ class TTT_MinimaxPlayer(Player):
         :param player_letter: value representing the player
         :return: [row, col, best_score] of the selected move
         """
+        opponent = "O" if player_letter == "X" else "X"
+        
         if game.game_over() or depth == 0:
-            return [None, None, self.evaluate(game)]
+            return [-1, -1, self.evaluate(game)]
         
-        best = [None, None, None]
         
-        if player_letter == "X":
+        if player_letter == self.letter:
             best_score = -math.inf
-            best = [None, None, best_score]
+            best = [-1, -1, best_score]
             
             for cell in game.empty_cells(state=game.board_state):
                 next_x, next_y = cell
                 temp_game = game.copy()
                 temp_game.set_move(next_x, next_y, player_letter)
-                _, _, score = self.minimax(temp_game, depth - 1, "O")
+                _, _, score = self.minimax(temp_game, depth - 1, opponent)
                 
                 if score > best_score:
                     best_score = score
                     best = [next_x, next_y, best_score]
             return best                
-            
-            
-        if player_letter == "O":
+        else:
             best_score = math.inf
-            best = [None, None, best_score]
+            best = [-1, -1, best_score]
             
             for cell in game.empty_cells(state=game.board_state):
                 next_x, next_y = cell
                 temp_game = game.copy()
                 temp_game.set_move(next_x, next_y, player_letter)
-                _, _, score = self.minimax(temp_game, depth - 1, "X")
+                _, _, score = self.minimax(temp_game, depth - 1, opponent)
                 
                 if score < best_score:
                     best_score = score
@@ -70,8 +69,6 @@ class TTT_MinimaxPlayer(Player):
             return best
         
         
-        return best
-    
     def evaluate(self, game: TicTacToe) -> int:
         """
         Function to evaluate the score of game state.
@@ -79,10 +76,11 @@ class TTT_MinimaxPlayer(Player):
         :return: the score of the board from the perspective of current player
         """
         
-        if game.wins("X"): 
+        if game.wins(self.letter):
             return 1
         
-        if game.wins("O"): 
+        opponent = "O" if self.letter == "X" else "X"
+        if game.wins(opponent):
             return -1
         
         return 0

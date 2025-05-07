@@ -36,20 +36,19 @@ class TTT_AlphaBetaPlayer(Player):
         :param beta: best value that the minimizer can guarantee
         :return: [row, col, best_score] of the selected move
         """
-        if game.game_over() or depth == 0:
-            return [None, None, self.evaluate(game)]
+        opponent = "X" if player_letter == "O" else "O"
         
-        best = [None, None, None]        
-
-        if player_letter == "X":
+        if game.game_over() or depth == 0:
+            return [-1, -1, self.evaluate(game)]
+        
+        if player_letter == self.letter:
             best_score = -math.inf
-            best = [None, None, best_score]
-            
+            best = [-1, -1, best_score]
             for cell in game.empty_cells(state=game.board_state):
                 next_x, next_y = cell
                 temp_game = game.copy()
                 temp_game.set_move(next_x, next_y, player_letter)
-                _, _, score = self.minimax(temp_game, depth - 1, "O", alpha, beta)
+                _, _, score = self.minimax(temp_game, depth - 1, opponent, alpha, beta)
                 
                 if score > best_score:
                     best_score = score
@@ -60,16 +59,14 @@ class TTT_AlphaBetaPlayer(Player):
                 if beta <= alpha:
                     break
             return best
-
-        if player_letter == "O":
+        else:
             best_score = math.inf
-            best = [None, None, best_score]
-            
+            best = [-1, -1, best_score]
             for cell in game.empty_cells(state=game.board_state):
                 next_x, next_y = cell
                 temp_game = game.copy()
                 temp_game.set_move(next_x, next_y, player_letter)
-                _, _, score = self.minimax(temp_game, depth - 1, "X", alpha, beta)
+                _, _, score = self.minimax(temp_game, depth - 1, opponent, alpha, beta)
                 
                 if score < best_score:
                     best_score = score
@@ -79,8 +76,8 @@ class TTT_AlphaBetaPlayer(Player):
                 beta = min(beta, best_score)
                 if beta <= alpha:
                     break
-
-        return best
+            return best
+        
     
     def evaluate(self, game: TicTacToe) -> int:
         """
@@ -88,10 +85,11 @@ class TTT_AlphaBetaPlayer(Player):
         :param game: the game state to evaluate
         :return: the score of the board from the perspective of current player
         """
-        if game.wins("X"):
+        if game.wins(self.letter):
             return 1
         
-        if game.wins("O"):
+        opponent = "X" if self.letter == "O" else "O"
+        if game.wins(opponent):
             return -1
         
         return 0

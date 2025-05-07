@@ -129,17 +129,19 @@ class GamePlay():
         # Print final scores and time statistics
         print("Final Scoreboard:")
         for player, wins in self.score.items():
-            print(f"{player} wins {wins}/{self.num_games} games")
-        
+            # If player is MCTS, print the num simulations and exploration constant
+            if str(player) == 'MCTS Player':
+                print(f"{player} wins {wins}/{self.num_games} games with {player.num_simulations} simulations and exploration constant {player.exploration_constant:.2f}")
+            else:
+                print(f"{player} wins {wins}/{self.num_games} games")
+                
         draw = self.num_games - sum(self.score.values())
         print(f"Draws {draw}/{self.num_games} games\n")
         
-        # for player, times in move_times.items():
-        #     avg_time_per_move = sum(times) / len(times) if times else 0
-        #     print(f"{player} average move duration: {avg_time_per_move:.2f} seconds")
         for player, times in move_times.items():
-            avg_time_per_move = sum(times) / len(times) * 1000 if times else 0
-            print(f"{player} average move duration: {avg_time_per_move:.2f} milliseconds")
+            avg_time_per_move = sum(times) / len(times) if times else 0
+            avg_time_per_move_in_ms = sum(times) / len(times) * 1000 if times else 0
+            print(f"{player} average move duration: {avg_time_per_move:.2f} seconds or {avg_time_per_move_in_ms:.2f} milliseconds")
         print(f"Total evaluation time: {total_evaluation_time:.2f} seconds\n")
     
     def run_ui_mode(self):

@@ -1,5 +1,5 @@
 from typing import List, Tuple, Union             
-from ..player import Player
+from ..player import Player, RandomPlayer
 from ..game import TicTacToe
 from . import *
 from tqdm import tqdm
@@ -31,6 +31,8 @@ class TTT_QPlayer(Player):
         else:
             opponent = self.opponent(opponent_letter)
             
+        # using random player
+        # opponent = RandomPlayer(opponent_letter)
         print(f"Training Q Player [{self.letter}] for {self.num_episodes} episodes...")
         game_state = game.copy()
         
@@ -80,6 +82,8 @@ class TTT_QPlayer(Player):
     def choose_action(self, game: TicTacToe) -> Union[List[int], Tuple[int, int]]:
         """
         Choose action with ε-greedy strategy.
+        if random number < ε, choose random action
+        else choose action with the highest Q-value
         """
         possible_actions = game.empty_cells()
         state = self.hash_board(game.board_state)
@@ -100,7 +104,8 @@ class TTT_QPlayer(Player):
     
     def update_q_values(self, state, action, next_state, reward):
         """
-        Update Q-value for a single state-action pair.
+        Given (s, a, s', r), update the Q-value for the state-action pair (s, a) using the Bellman equation:
+            Q(s, a) = Q(s, a) + alpha * (reward + gamma * max(Q(s', a')) - Q(s, a))
         """
         curr_q = self.Q.get((state, action), 0)
         # Estimate max future Q value from next state
